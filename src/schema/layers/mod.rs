@@ -209,13 +209,13 @@ mod tests {
                         length: None,
                         value: PositionValueK::Static(vec![256.0, 256.0]),
                     }),
-                    position: AnyTransformP::Position(Position {
+                    position: Some(AnyTransformP::Position(Position {
                         property_index: None,
                         animated: Some(BoolInt::False),
                         expression: None,
                         length: None,
                         value: PositionValueK::Static(vec![256.0, 256.0]),
-                    }),
+                    })),
                     scale: Some(MultiDimensional {
                         animated_property: AnimatedProperty {
                             animated: Some(BoolInt::False),
