@@ -96,9 +96,7 @@ impl Renderer {
         let transform = self.compute_transform(layer_set, layer, parent_transform, frame);
         let full_rect = Rect::new(0.0, 0.0, animation.width as f64, animation.height as f64);
         if let Some((mode, mask_index)) = layer.mask_layer {
-            // todo: re-enable masking when it is more understood (and/or if
-            // it's currently supported in vello?) Extra layer to
-            // isolate blending for the mask
+            // Extra layer to isolate blending for the mask
             scene.push_layer(Mix::Normal, 1.0, parent_transform, &full_rect);
             if let Some(mask) = layer_set.get(mask_index) {
                 self.render_layer(
@@ -483,10 +481,11 @@ impl Batch {
             for geometry in self.geometries[draw.geometry.clone()].iter() {
                 let path = &self.elements[geometry.elements.clone()];
                 let transform = geometry.transform;
-                // Pass draw.transform as `brush_transform` so gradient coordinates are
-                // evaluated in the outer group's coordinate space (where gradient
-                // start/end points are defined), rather than each letter's local space.
-                let brush_transform = Some(draw.transform);
+                // Vello composes the brush transform as `transform * brush_transform`,
+                // so to place the gradient in the draw's coordinate space (where
+                // gradient start/end points are defined), we need to undo the
+                // per-geometry transform first: result = geom * (geom⁻¹ * draw) = draw.
+                let brush_transform = Some(geometry.transform.inverse() * draw.transform);
                 scene.draw(
                     draw.stroke.as_ref(),
                     transform,
