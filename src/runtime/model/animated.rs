@@ -348,7 +348,29 @@ impl Gradient {
     pub fn evaluate(&self, frame: f64) -> peniko::Brush {
         let start = self.start_point.evaluate(frame);
         let end = self.end_point.evaluate(frame);
-        let stops = self.stops.evaluate(frame).into_owned();
+        let mut stops = self.stops.evaluate(frame).into_owned();
+        // Ensure explicit stops at 0.0 and 1.0 to work around renderers that
+        // don't correctly pad gradients when the first/last stop is not at
+        // the boundary.
+        if let Some(first) = stops.first().copied()
+            && first.offset > 0.0
+        {
+            stops.insert(
+                0,
+                peniko::ColorStop {
+                    offset: 0.0,
+                    ..first
+                },
+            );
+        }
+        if let Some(last) = stops.last().copied()
+            && last.offset < 1.0
+        {
+            stops.push(peniko::ColorStop {
+                offset: 1.0,
+                ..last
+            });
+        }
         if self.is_radial {
             let radius = (end.to_vec2() - start.to_vec2()).hypot();
             let mut grad = peniko::Gradient::new_radial(start, radius as f32);

@@ -481,10 +481,6 @@ impl Batch {
             for geometry in self.geometries[draw.geometry.clone()].iter() {
                 let path = &self.elements[geometry.elements.clone()];
                 let transform = geometry.transform;
-                // Vello composes the brush transform as `transform * brush_transform`,
-                // so to place the gradient in the draw's coordinate space (where
-                // gradient start/end points are defined), we need to undo the
-                // per-geometry transform first: result = geom * (geom⁻¹ * draw) = draw.
                 let brush_transform = Some(geometry.transform.inverse() * draw.transform);
                 scene.draw(
                     draw.stroke.as_ref(),
