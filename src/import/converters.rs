@@ -3,7 +3,7 @@
 
 use super::builders::{setup_layer_base, setup_precomp_layer, setup_shape_layer};
 use super::defaults::{
-    FLOAT_VALUE_ONE_HUNDRED, FLOAT_VALUE_ZERO, MULTIDIM_ONE, POSITION_ZERO, POSITION_ZERO_P,
+    FLOAT_VALUE_ONE_HUNDRED, FLOAT_VALUE_ZERO, MULTIDIM_HUNDRED, POSITION_ZERO, POSITION_ZERO_P,
 };
 use crate::import::builders::LayerSetupParams;
 use crate::runtime::model::Easing;
@@ -228,7 +228,7 @@ pub fn conv_transform(
     let transform = animated::Transform {
         anchor: conv_pos_point(value.anchor_point.as_ref().unwrap_or(&POSITION_ZERO)),
         position,
-        scale: conv_vec2(value.scale.as_ref().unwrap_or(&MULTIDIM_ONE)),
+        scale: conv_vec2(value.scale.as_ref().unwrap_or(&MULTIDIM_HUNDRED)),
         rotation: conv_scalar(rotation_in),
         skew: conv_scalar(value.skew.as_ref().unwrap_or(&FLOAT_VALUE_ZERO)),
         skew_angle: conv_scalar(value.skew_axis.as_ref().unwrap_or(&FLOAT_VALUE_ZERO)),
@@ -248,7 +248,12 @@ pub fn conv_shape_transform(value: &schema::shapes::transform::TransformShape) -
         },
         None => &FLOAT_VALUE_ZERO,
     };
-    let position_in = match value.transform.position.as_ref().unwrap_or(&POSITION_ZERO_P) {
+    let position_in = match value
+        .transform
+        .position
+        .as_ref()
+        .unwrap_or(&POSITION_ZERO_P)
+    {
         schema::helpers::transform::AnyTransformP::Position(position) => position,
         schema::helpers::transform::AnyTransformP::SplitPosition(_) => {
             // todo: split vectors
@@ -265,7 +270,7 @@ pub fn conv_shape_transform(value: &schema::shapes::transform::TransformShape) -
                 .unwrap_or(&POSITION_ZERO),
         ),
         position: Position::Value(conv_pos_point(position_in)),
-        scale: conv_vec2(value.transform.scale.as_ref().unwrap_or(&MULTIDIM_ONE)),
+        scale: conv_vec2(value.transform.scale.as_ref().unwrap_or(&MULTIDIM_HUNDRED)),
         rotation: conv_scalar(rotation_in),
         skew: conv_scalar(value.transform.skew.as_ref().unwrap_or(&FLOAT_VALUE_ZERO)),
         skew_angle: conv_scalar(
