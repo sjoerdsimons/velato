@@ -507,10 +507,11 @@ fn conv_draw(value: &schema::shapes::AnyShape) -> Option<runtime::model::Draw> {
                 stops: conv_gradient_colors(&value.gradient.colors),
             };
             let brush = animated::Brush::Gradient(gradient).into_model();
+            let opacity = conv_scalar(&value.shape_style.opacity);
             Some(Draw {
                 stroke: None,
                 brush,
-                opacity: Value::Fixed(100.0),
+                opacity,
             })
         }
         AnyShape::GradientStroke(value) => {
@@ -555,10 +556,11 @@ fn conv_draw(value: &schema::shapes::AnyShape) -> Option<runtime::model::Draw> {
                 stops: conv_gradient_colors(&value.gradient.colors),
             };
             let brush = animated::Brush::Gradient(gradient).into_model();
+            let opacity = conv_scalar(&value.shape_style.opacity);
             Some(Draw {
                 stroke: Some(stroke.into_model()),
                 brush,
-                opacity: Value::Fixed(100.0),
+                opacity,
             })
         }
         _ => None,

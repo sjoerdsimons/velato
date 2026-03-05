@@ -132,10 +132,12 @@ impl Time {
         let t0 = times[ix0];
         let t1 = times[ix1];
         let (t0_ox, t0_oy) = t0.out_tangent.map(|o| (o.x, o.y)).unwrap_or((0.0, 0.0));
-        let (t0_ix, t0_iy) = t0.in_tangent.map(|i| (i.x, i.y)).unwrap_or((1.0, 1.0));
+        // Use t1's in_tangent: Lottie stores the incoming tangent on the
+        // destination keyframe, not on the source keyframe.
+        let (t1_ix, t1_iy) = t1.in_tangent.map(|i| (i.x, i.y)).unwrap_or((1.0, 1.0));
         let easing = Easing {
             o: EasingHandle { x: t0_ox, y: t0_oy },
-            i: EasingHandle { x: t0_ix, y: t0_iy },
+            i: EasingHandle { x: t1_ix, y: t1_iy },
         };
         let hold = t0.hold;
         let t = (frame - t0.frame) / (t1.frame - t0.frame);
