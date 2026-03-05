@@ -2,7 +2,9 @@
 // SPDX-License-Identifier: Apache-2.0 OR MIT
 
 use super::builders::{setup_layer_base, setup_precomp_layer, setup_shape_layer};
-use super::defaults::{FLOAT_VALUE_ONE_HUNDRED, FLOAT_VALUE_ZERO, MULTIDIM_ONE, POSITION_ZERO};
+use super::defaults::{
+    FLOAT_VALUE_ONE_HUNDRED, FLOAT_VALUE_ZERO, MULTIDIM_ONE, POSITION_ZERO, POSITION_ZERO_P,
+};
 use crate::import::builders::LayerSetupParams;
 use crate::runtime::model::Easing;
 use crate::runtime::model::animated::{self, Position};
@@ -214,7 +216,7 @@ pub fn conv_transform(
         None => todo!("split rotation"),
     };
 
-    let position = match &value.position {
+    let position = match value.position.as_ref().unwrap_or(&POSITION_ZERO_P) {
         schema::helpers::transform::AnyTransformP::Position(position) => {
             Position::Value(conv_pos_point(position))
         }
@@ -246,7 +248,7 @@ pub fn conv_shape_transform(value: &schema::shapes::transform::TransformShape) -
         },
         None => &FLOAT_VALUE_ZERO,
     };
-    let position_in = match &value.transform.position {
+    let position_in = match value.transform.position.as_ref().unwrap_or(&POSITION_ZERO_P) {
         schema::helpers::transform::AnyTransformP::Position(position) => position,
         schema::helpers::transform::AnyTransformP::SplitPosition(_) => {
             // todo: split vectors

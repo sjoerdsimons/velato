@@ -18,7 +18,9 @@ pub struct Transform {
     pub anchor_point: Option<Position>,
     /// Position / Translation
     #[serde(rename = "p")]
-    pub position: AnyTransformP,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    #[serde(default)]
+    pub position: Option<AnyTransformP>,
     /// Scale factor, 100 for no scaling
     #[serde(rename = "s")]
     #[serde(skip_serializing_if = "Option::is_none")]

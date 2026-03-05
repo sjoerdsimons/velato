@@ -6,6 +6,7 @@ use crate::schema::animated_properties::multi_dimensional::MultiDimensional;
 use crate::schema::animated_properties::position::Position;
 use crate::schema::animated_properties::value::FloatValue;
 use crate::schema::helpers::int_boolean::BoolInt;
+use crate::schema::helpers::transform::AnyTransformP;
 use crate::schema::{self};
 use std::sync::LazyLock;
 
@@ -47,3 +48,8 @@ pub static POSITION_ZERO: LazyLock<Position> = LazyLock::new(|| Position {
     length: None,
     value: schema::animated_properties::position::PositionValueK::Static(vec![0.0, 0.0]),
 });
+
+/// Default `AnyTransformP` wrapping `POSITION_ZERO`, used when a layer's
+/// transform omits the `"p"` field (valid per the Lottie spec).
+pub static POSITION_ZERO_P: LazyLock<AnyTransformP> =
+    LazyLock::new(|| AnyTransformP::Position(POSITION_ZERO.clone()));
