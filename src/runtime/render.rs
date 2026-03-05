@@ -29,6 +29,7 @@ pub trait RenderSink {
         stroke: Option<&fixed::Stroke>,
         transform: Affine,
         brush: &fixed::Brush,
+        brush_transform: Option<Affine>,
         shape: &impl kurbo::Shape,
     );
 }
@@ -189,7 +190,8 @@ impl Renderer {
                     self.batch.push_geometry(geometry, transform, frame);
                 }
                 Shape::Draw(draw) => {
-                    self.batch.push_draw(draw, alpha, geometry_start, frame);
+                    self.batch
+                        .push_draw(draw, alpha, transform, geometry_start, frame);
                 }
                 Shape::Repeater(repeater) => {
                     let repeater = repeater.evaluate(frame);
@@ -240,12 +242,15 @@ struct DrawData {
     stroke: Option<fixed::Stroke>,
     brush: fixed::Brush,
     alpha: f64,
+    /// Transform at which this draw was defined (the outer group's coordinate space).
+    /// Used as `brush_transform` so gradients are evaluated in the correct space.
+    transform: Affine,
     /// Range into `ShapeBatch::geometries`
     geometry: Range<usize>,
 }
 
 impl DrawData {
-    fn new(draw: &Draw, alpha: f64, geometry: Range<usize>, frame: f64) -> Self {
+    fn new(draw: &Draw, alpha: f64, transform: Affine, geometry: Range<usize>, frame: f64) -> Self {
         Self {
             stroke: draw
                 .stroke
@@ -253,6 +258,7 @@ impl DrawData {
                 .map(|stroke| stroke.evaluate(frame).into_owned()),
             brush: draw.brush.evaluate(1.0, frame).into_owned(),
             alpha: alpha * draw.opacity.evaluate(frame) / 100.0,
+            transform,
             geometry,
         }
     }
@@ -300,10 +306,18 @@ impl Batch {
         }
     }
 
-    fn push_draw(&mut self, draw: &Draw, alpha: f64, geometry_start: usize, frame: f64) {
+    fn push_draw(
+        &mut self,
+        draw: &Draw,
+        alpha: f64,
+        transform: Affine,
+        geometry_start: usize,
+        frame: f64,
+    ) {
         self.draws.push(DrawData::new(
             draw,
             alpha,
+            transform,
             geometry_start..self.geometries.len(),
             frame,
         ));
@@ -469,7 +483,17 @@ impl Batch {
             for geometry in self.geometries[draw.geometry.clone()].iter() {
                 let path = &self.elements[geometry.elements.clone()];
                 let transform = geometry.transform;
-                scene.draw(draw.stroke.as_ref(), transform, brush, &path);
+                // Pass draw.transform as `brush_transform` so gradient coordinates are
+                // evaluated in the outer group's coordinate space (where gradient
+                // start/end points are defined), rather than each letter's local space.
+                let brush_transform = Some(draw.transform);
+                scene.draw(
+                    draw.stroke.as_ref(),
+                    transform,
+                    brush,
+                    brush_transform,
+                    &path,
+                );
             }
         }
     }

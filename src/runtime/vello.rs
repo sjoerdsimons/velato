@@ -30,12 +30,13 @@ impl RenderSink for vello::Scene {
         stroke: Option<&fixed::Stroke>,
         transform: Affine,
         brush: &fixed::Brush,
+        brush_transform: Option<Affine>,
         shape: &impl Shape,
     ) {
         if let Some(stroke) = stroke {
-            self.stroke(stroke, transform, brush, None, shape);
+            self.stroke(stroke, transform, brush, brush_transform, shape);
         } else {
-            self.fill(Fill::NonZero, transform, brush, None, shape);
+            self.fill(Fill::NonZero, transform, brush, brush_transform, shape);
         }
     }
 }
